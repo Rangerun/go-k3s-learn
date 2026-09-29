@@ -1,0 +1,17 @@
+# go编译缓存
+*.log
+*.out
+vendor/
+*.swp
+*.swo
+
+# git相关
+.git
+.gitignore
+.github
+
+# 本地环境文件
+NOTES.md
+*.md
+.env
+.DS_Store
