@@ -19,13 +19,16 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
+			"version": "v2",
 		})
 	})
 
-	// hello业务接口
+	//原来v1返回: hello go k3s demo
+	//v2修改接口返回
 	r.GET("/hello", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "hello go k3s demo",
+		c.JSON(200, gin.H{
+			"msg":  "hello go k3s demo v2",
+			"ver":  "v2",
 		})
 	})
 
