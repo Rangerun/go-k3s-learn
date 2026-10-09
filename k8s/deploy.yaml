@@ -15,10 +15,21 @@ spec:
     spec:
       containers:
       - name: go-demo
-        image: go-demo:v2
+        image: go-demo:v3
         imagePullPolicy: IfNotPresent   #重点！优先本地，不去远端拉
         ports:
         - containerPort: 8080
+        env:
+        - name: APP_VER
+          valueFrom:
+            configMapKeyRef:
+              name: go-demo-cm
+              key: APP_VER
+        - name: APP_MSG
+          valueFrom:
+            configMapKeyRef:
+              name: go-demo-cm
+              key: APP_MSG
         resources:
           requests:
             cpu: "100m"

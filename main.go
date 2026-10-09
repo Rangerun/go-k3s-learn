@@ -14,7 +14,8 @@ import (
 
 func main() {
 	r := gin.Default()
-
+	appVer := os.Getenv("APP_VER")
+	appMsg := os.Getenv("APP_MSG")
 	// 健康检查接口，k8s探针使用
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -27,8 +28,8 @@ func main() {
 	//v2修改接口返回
 	r.GET("/hello", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"msg":  "hello go k3s demo v2",
-			"ver":  "v2",
+			"ver": appVer,
+			"msg": appMsg,
 		})
 	})
 
