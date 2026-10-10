@@ -16,11 +16,13 @@ func main() {
 	r := gin.Default()
 	appVer := os.Getenv("APP_VER")
 	appMsg := os.Getenv("APP_MSG")
+	dbPass := os.Getenv("DB_PASSWORD")
 	// 健康检查接口，k8s探针使用
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
 			"version": "v2",
+			"db_pass":  dbPass, //练习演示用！线上禁止返回密钥
 		})
 	})
 

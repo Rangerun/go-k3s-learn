@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: go-demo-cm
 data:
-  APP_VER: "v3-from-configmap"
+  APP_VER: "v4-from-configmap"
   APP_MSG: "hello configmap from k3s"
