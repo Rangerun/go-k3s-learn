@@ -1,66 +1,42 @@
 package main
 
 import (
-	"context"
-	"log"
-	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
 	"github.com/gin-gonic/gin"
 )
 
+// 标记是否故障，用于测试存活探针
+var isBroken bool = false
+
 func main() {
 	r := gin.Default()
+
 	appVer := os.Getenv("APP_VER")
 	appMsg := os.Getenv("APP_MSG")
 	dbPass := os.Getenv("DB_PASSWORD")
-	// 健康检查接口，k8s探针使用
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
-			"version": "v2",
-			"db_pass":  dbPass, //练习演示用！线上禁止返回密钥
-		})
-	})
 
-	//原来v1返回: hello go k3s demo
-	//v2修改接口返回
 	r.GET("/hello", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"ver": appVer,
-			"msg": appMsg,
+			"ver":     appVer,
+			"msg":     appMsg,
+			"db_pass": dbPass,
 		})
 	})
 
-	srv := &http.Server{
-		Addr:    ":8080",
-		Handler: r,
-	}
-
-	// 启动goroutine运行http服务
-	go func() {
-		log.Printf("server start listen on :8080")
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen serve err: %v", err)
+	// 健康检查接口
+	r.GET("/health", func(c *gin.Context) {
+		if isBroken {
+			c.Status(500)
+			return
 		}
-	}()
+		c.Status(200)
+	})
 
-	// 捕获退出信号 SIGINT(Ctrl‑C) SIGTERM(k8s pod删除发出的信号)
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("received shutdown signal, start graceful shutdown ...")
+	// 制造故障的接口，访问这个接口把isBroken置为true，模拟程序卡死
+	r.GET("/break", func(c *gin.Context) {
+		isBroken = true
+		c.JSON(200, gin.H{"info": "now service broken, health will return 500"})
+	})
 
-	// 设置5s优雅关闭超时时间
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("server forced to shutdown: %v", err)
-	}
-
-	log.Println("server gracefully exited")
+	r.Run(":8080")
 }
